@@ -1277,4 +1277,20 @@ class ConfigSubstitutionTest extends TestUtils {
         val resolved2 = resolve(obj2)
         assertEquals(parseObject("{ x : 42, y : 42 }"), resolved2.getConfig("a").root)
     }
+
+    @Test
+    def incorrectCycleFailure() {
+        val obj = parseObject("""
+default {}
+override = ${default} {
+  a {
+    value = 2
+  }
+  b = ${override.a}
+}
+""")
+        val resolved = resolve(obj)
+        assertEquals(parseObject("value = 2"), resolved.getConfig("override.b"))
+    }
+
 }
